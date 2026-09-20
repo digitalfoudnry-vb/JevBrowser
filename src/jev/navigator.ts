@@ -82,6 +82,7 @@ export async function jevNavigate(
         interactive_elements: elements.map((e) => ({ id: e.id, description: e.description })),
         element_list_truncated: truncated,
         history,
+        allowed_hosts: Array.from(allowedHosts),
       };
 
       const criteria = buildCriteria(elements);

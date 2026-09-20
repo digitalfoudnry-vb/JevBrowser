@@ -90,14 +90,23 @@ export async function generateStandaloneSnapshot(page: any): Promise<SnapshotRes
       const type = (el.getAttribute("type") || "").toLowerCase();
       if (type === "password" || type === "hidden") continue;
 
-      const name = (
+      let name = (
         el.getAttribute("aria-label") ||
         el.getAttribute("placeholder") ||
         el.getAttribute("title") ||
-        el.innerText ||
-        el.textContent ||
         ""
-      ).replace(/\s+/g, " ").trim().slice(0, 100);
+      );
+      if (!name && el.id) {
+        const lEl = document.querySelector(`label[for="${el.id}"]`);
+        if (lEl) name = lEl.textContent || "";
+      }
+      if (!name && el.closest("label")) {
+        name = el.closest("label")?.textContent || "";
+      }
+      if (!name) {
+        name = el.getAttribute("name") || el.getAttribute("value") || el.innerText || el.textContent || "";
+      }
+      name = name.replace(/\s+/g, " ").trim().slice(0, 100);
 
       const ref = `@${idx++}`;
       el.setAttribute("data-jev-ref", ref);

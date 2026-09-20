@@ -230,16 +230,23 @@ async function extractAndStamp(page: Page, bounded: (cap: number) => number): Pr
         const roleAttr = el.getAttribute("role") || "";
         const typeAttr = (el.getAttribute("type") || "").toLowerCase();
         if (["password", "file", "hidden"].includes(typeAttr) || el.hasAttribute("disabled") || el.getAttribute("aria-disabled") === "true") continue;
-        const label = (
+        let label = (
           el.getAttribute("aria-label") ||
           el.getAttribute("placeholder") ||
           el.getAttribute("title") ||
-          el.innerText ||
-          el.textContent ||
           ""
-        )
-          .replace(/\s+/g, " ")
-          .trim();
+        );
+        if (!label && el.id) {
+          const lEl = document.querySelector(`label[for="${el.id}"]`);
+          if (lEl) label = lEl.textContent || "";
+        }
+        if (!label && el.closest("label")) {
+          label = el.closest("label")?.textContent || "";
+        }
+        if (!label) {
+          label = el.getAttribute("name") || el.getAttribute("value") || el.innerText || el.textContent || "";
+        }
+        label = label.replace(/\s+/g, " ").trim().slice(0, 100);
         const href = tag === "a" ? (el.getAttribute("href") || "").slice(0, 2048) : "";
         const clickable =
           ["a", "button"].includes(tag) ||
@@ -460,6 +467,7 @@ async function navigateRun(options: NavigateOptions, externalSignal?: AbortSigna
         element_list_truncated: truncated,
         no_interactive_elements: elements.length === 0,
         history,
+        allowed_hosts: Array.from(allowedHosts),
       };
       const criteria = buildCriteria(elements);
       const answers = validateStepAnswers(await askJev(budget, state, stepQuestions(criteria)), criteria);
