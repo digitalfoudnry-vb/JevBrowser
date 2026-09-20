@@ -1,4 +1,11 @@
+<div align="center">
+
+<img src="assets/logo.png" alt="Jev Browser Logo" width="180" />
+
 # Jev Browser Skill
+### *Autonomous AI Browser powered by Jev Decision Intelligence*
+
+</div>
 
 A reusable browser skill and local MCP server for **Claude Code, Codex, Hermes and OpenClaw**. The skill is packaged in [`jevskills/jev-browser`](jevskills/jev-browser/SKILL.md). Jev selects browser actions through Vercel AI Gateway; Playwright executes them. The host agent uses its normal chat model.
 
