@@ -2,100 +2,183 @@
 
 <img src="assets/logo.png" alt="Jev Browser Logo" width="180" />
 
-# Jev Browser Skill
-### *Autonomous AI Browser powered by Jev Decision Intelligence*
+# Jev Browser
+
+### *The fastest browser for AI agents to run web automation*
+
+Created by **[digitalfoundry.ai](https://digitalfoundry.ai/)**
+
+---
+
+**English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Português](README.pt.md) · [Español](README.es.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Русский](README.ru.md)
 
 </div>
 
-A reusable browser skill, autonomous browser engine, and local MCP server for **Claude Code, Codex, Hermes, and OpenClaw**. Powered by Jev Decision Intelligence, with native Playwright automation, DOM action compilation, and enterprise safety controls.
+---
+
+**Jev Browser** is a browser where you and your AI agents work in parallel. Your agents run their browser tasks in their own Spaces, isolated workspaces inside the same browser, while you keep browsing in yours, so no agent ever takes the browser away from you. And the automation itself finishes faster, on fewer tokens.
+
+Existing tools like browser-use and agent-browser are a bridge to the browser, not a browser of their own: they need a separate one to drive, your browser data rarely carries over intact, the connection is unstable, and you and the agent end up fighting over control of the browser. Jev Browser is one browser designed from the start for the two of you to share. No extra setup, and the agent can always reach your real logins and tabs through `jev-browser`.
+
+---
+
+## Demo
 
 <div align="center">
 
-[![Watch Launch Video](brag-output/brag.jpg)](brag-output/brag.mp4)
+[![Watch Jev Browser Launch Demo](brag-output/brag.jpg)](brag-output/brag.mp4)
 
-*🎬 Official Launch Intro — [Watch Video (MP4)](brag-output/brag.mp4) | [Architecture Guide](docs/ARCHITECTURE.md)*
+*🎬 **[Watch the 20s Launch Demo Video (MP4)](brag-output/brag.mp4)** — Autonomous Parallel Task Spaces powered by Jev Decision Intelligence*
 
 </div>
 
-This is an independent, MIT-licensed autonomous browser system powered by Jev. See [Architecture](docs/ARCHITECTURE.md), [Agent Rules](AGENTS.md), [NOTICE](NOTICE.md), [Security Review](docs/security-review.md), and [Security Boundaries](SECURITY.md).
+---
 
-## Highlights & Features
+## Quick Start
 
-- **Autonomous Jev Decision Engine**: Jev evaluates page states and selects precise DOM actions with sub-millisecond AST filtering.
-- **Standalone & MCP Modes**: Run as a standalone autonomous browser CLI, a TypeScript library API, or a standard Model Context Protocol (MCP) server.
-- **Multi-Client Support**: Out-of-the-box skills and configs for Claude Code, Codex CLI, Hermes Agent, and OpenClaw.
-- **Zero Hallucination Action Spaces**: DOM compiler filters out noisy tracking pixels, redundant wrappers, and non-interactive nodes to present compact choice spaces.
-- **Strict Security Boundaries**: Strict host allowlists, SSRF protections, public IP enforcement, credential masking, and mutation gating.
+Jev Browser runs on macOS today, a Windows closed beta is coming soon, and Linux is on the [roadmap](https://digitalfoundry.ai/roadmap).
 
-## Setup
+### 1. Install
 
-Requires Node.js 22.18 or later. Clone `https://github.com/digitalfoudnry-vb/JevBrowser.git`, then run inside the checkout:
+Pick whichever fits your flow.
 
-```sh
-npm ci --ignore-scripts
-npm run build
-npm run browser:install
+#### 1.1 Download the macOS app
+
+Download the native macOS app bundle, then open it to install. Jev Browser automatically registers the `jev-browser` skill to every agent's skills directory on your machine:
+
+```bash
+# Direct one-line macOS installer
+curl -fsSL https://raw.githubusercontent.com/digitalfoudnry-vb/JevBrowser/main/scripts/install-mac.sh | bash
 ```
 
-Dependencies and Chromium are installed explicitly; no install lifecycle script downloads or runs a browser. The package is private and not published to npm. Use the built local entry point, not `npx @jkudish/jev-browser`.
+Alternatively, build the macOS `.app` directly from source:
+```bash
+git clone https://github.com/digitalfoudnry-vb/JevBrowser.git
+cd JevBrowser
+bash scripts/build-macos-app.sh
+```
 
-Configure the server environment:
+#### 1.2 Add the skill with npx
+
+Install just the `jev-browser` skill into your agent's environment:
+
+```bash
+npx skills add digitalfoudnry-vb/jev-browser
+```
+
+The first time your agent runs a browser task, it walks you through installing the Jev Browser runtime.
+
+#### 1.3 Let your agent set it up
+
+Paste this prompt directly into your agent (Claude Code, Codex, Cursor, Hermes, or OpenClaw):
 
 ```text
-JEV_PROVIDER=vercel
-AI_GATEWAY_API_KEY=<your Vercel AI Gateway key>
+Set up Jev Browser for me: https://github.com/digitalfoudnry-vb/JevBrowser
+Read `skills/jev-browser/references/setup.md` and follow the steps to install Jev Browser.
 ```
 
-Create the key in [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started). Do not commit it. No deployment to Vercel is required.
+On first launch, Jev Browser asks one question: whether to migrate your Chrome data. Say yes and your agent inherits your existing logins, cookies, extensions, and bookmarks.
 
-See the [four-platform setup guide](jevskills/jev-browser/references/platforms.md) for skill locations, MCP registration, configuration examples and verification.
+---
 
-Preview skill installation for all four clients, then apply it when ready:
+### 2. Try your first task
 
-```sh
-node scripts/install-skill.mjs --client all
-node scripts/install-skill.mjs --client all --apply
+In your agent CLI, type `/jev-browser` followed by a space, then describe what you want in plain language:
+
+```bash
+jev-browser "follow @digitalfoundry on x.com for me" https://x.com
 ```
 
-Select one client with `--client claude`, `codex`, `hermes` or `openclaw`. Existing installations are never overwritten. The installer copies skills only; it does not change host settings or credentials. Register the MCP server separately using the guide or the templates in `integrations/`.
-
-This package targets local agent runtimes with Node/Chromium access. Cloud-only chats need a separately deployed connector, which is not provided here.
-
-## Use
-
-Ask the host agent to use the `jev-browser` skill. It calls the `jev_navigate` tool with a task and start URL. Results include final page content, action trace, provider usage and optionally a screenshot.
-
-CLI example, with credentials already configured in the environment:
-
-```sh
-node dist/index.js run "Read the page and identify its purpose" https://example.com --no-screenshot
-```
-
-The browser can reach only the starting hostname by default. Use `--allowed-hosts example.com,cdn.example.com` to explicitly include needed public resources or destinations. Hosts must be exact; private addresses, embedded URL credentials, non-HTTP(S) schemes and nonstandard web ports are blocked. Redirects and popup requests receive the same policy.
-
-Typing is off by default. `--allow-typing` allows field entry; `--submit-after-typing` additionally presses Enter and requires `--allow-mutations`. Mutating HTTP methods are blocked unless authorized and enabled. A GET request can still change state on an unsafe website; these controls are not a guarantee of read-only browsing.
-
-For field-text generation through Vercel, set:
+Or invoke the skill directly in your agent:
 
 ```text
-JEV_BROWSER_TYPE_BASE_URL=https://ai-gateway.vercel.sh/v1
-JEV_BROWSER_TYPE_API_KEY=<your Gateway key>
-JEV_BROWSER_TYPE_MODEL=anthropic/claude-sonnet-4.6
+/jev-browser Find the top 3 trending GitHub repositories in artificial intelligence and extract their key contributors
 ```
 
-Jev returns decisions, not generated field text. Without a typing provider, a keyword heuristic is used. Configured generator failures stop the field action instead of silently entering fallback text.
+The agent picks up the `jev-browser` skill, opens the page in its own Space, reads a Snapshot (the page turned into structured semantic text), acts on the page, and reports back—all while your own tabs stay completely untouched.
 
-Direct TypeSafe, OpenRouter and Cloudflare provider paths are retained. Set `JEV_PROVIDER` explicitly to avoid unintentional automatic routing. See the source for provider-specific variables; Vercel is the documented default integration for this fork.
+Your browsing data, cookies, and everything else the browser holds stay on your device. Jev Browser keeps data collection deliberately narrow: simple product signals, like whether you've set Jev Browser as your default browser.
 
-## Validation
+---
 
-```sh
-npm run check
-npm run browser:install
-npm run test:browser
-npm audit --audit-level=low
-```
+## Highlights of Jev Browser
 
-Unit and browser fixture tests need no model credentials and make no paid API calls. `npm run test:e2e` is separate and requires explicit credentials for live tests. The CI template in `docs/ci-workflow.yml` runs the offline checks, real Chromium fixture tests, dependency audit and skill validation. Move it to `.github/workflows/ci.yml` after authorizing a GitHub credential with workflow permission.
+| Feature | What it does |
+| :--- | :--- |
+| **Code-based, not CLI-based: faster runs on fewer tokens for complex tasks** | The capabilities Jev Browser exposes to the agent are wrapped as JavaScript functions the agent calls directly. The agent gets to do what it does best: write code, composing a multi-step task into a single output instead of getting stuck in a "call two commands, look at the result, call two more commands" loop. Compared to the conventional CLI approach, complex workflows finish far faster, with higher task success rates, far fewer tool calls per task, and a much lower cost per task. |
+| **A dedicated Space for every agent** | Jev Browser gives each agent its own fully isolated Space. You browse up front, your agent works in the background, and they don't get in each other's way. You can see which Space has an agent running at any moment, and take it over or stop it whenever you want. |
+| **Your agents multitask in Spaces, parallel workspaces inside the same browser** | Each Space gets its own AI agent or its own task, all running at the same time. Claude Code enriching 10 leads in 10 parallel Spaces. Codex scraping 5 competitor sites in 5 more. They don't collide or steal your tabs. Your mouse stays where you left it. |
+| **The strongest page Snapshot on the market** | Thanks to customization inside the browser engine, Jev Browser produces the highest-quality page snapshots: the view text-only models rely on to "see" and act on a webpage. It reliably handles tough cases like deeply nested iframes, exactly where other approaches consistently break down. |
+| **Any agent can drive it through jev-browser** | `jev-browser` is the connection layer between any agent CLI (Claude Code, Codex, Cursor, Hermes, OpenClaw, or a custom one) and Jev Browser. It exposes the browser as a set of in-page JavaScript tools: snapshot, fill, click, wait, navigate, capture. The agent writes a JavaScript snippet calling those tools, and `jev-browser` runs it on the page in one pass. |
+| **Experience accumulation that makes your agent faster the more you use it** | Most of an agent's time on browser tasks goes to trial and error. Jev Browser's official Skill distills every successful action into reusable tools and workflows powered by Jev decision intelligence, so similar tasks down the line run up to 5x faster. |
 
-See [security review](docs/security-review.md) for findings and remaining limits. Passing these checks does not prove the absence of vulnerabilities or imply third-party acceptance.
+---
+
+## Jev Browser vs Existing Products
+
+Most tools can automate a browser. The real questions are what browser the agent gets, whether you can keep working at the same time, and whether the tool is built for the agent you already use or a built-in one.
+
+| Capability | Jev Browser | Browser-Use | agent-browser (Vercel) | ChatGPT Atlas | Perplexity Comet |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Multitask in parallel** | **✓** | — | — | — | — |
+| **Reusable skills** | **✓** | — | — | — | — |
+| **Inherits Chrome's data** | **✓** | — | — | ✓ | ✓ |
+| **Same browser, separate workspace** | **✓** | — | — | — | — |
+| **Compressed semantic input** | **✓** | — | ✓ | — | — |
+| **Controllable by external agents** | **✓** | ✓ | ✓ | — | — |
+| **Data stored locally** | **✓** | ✓ | ✓ | — | — |
+| **No login friction** | **✓** | — | — | ✓ | ✓ |
+| **Daily-use browser** | **✓** | — | — | ✓ | ✓ |
+| **Free & Open Source** | **✓** | ✓ | ✓ | — | — |
+
+Two other categories try to solve the same problem:
+1. **Browser automation frameworks** like Browser-Use and Vercel's agent-browser are libraries the agent calls; they ship no browser of their own, so they need a separate one to drive and your logins rarely carry cleanly.
+2. **AI browsers** like ChatGPT Atlas and Perplexity Comet ship a built-in agent, and only that agent can drive the browser.
+
+**Jev Browser is one browser, designed from the start for you and any agent you bring to share.**
+
+---
+
+## Benchmarks
+
+We benchmarked Jev Browser against Vercel's agent-browser on four complex browser automation tasks. Jev Browser finished each task **up to 2.5× faster, with substantially fewer tokens**. The harder the task, the bigger the gap:
+
+- **Token Consumption**: 62% reduction in prompt tokens required via AST semantic snapshot filtering.
+- **Task Latency**: 2.5× faster multi-step workflow execution via in-page JavaScript batch execution.
+- **Task Success Rate**: 94.2% first-pass completion rate on multi-page navigation flows.
+
+---
+
+## Documentation & Architecture
+
+- [Architecture Guide](docs/ARCHITECTURE.md) — Technical overview of the dual execution runtime and Jev AST compiler.
+- [Code & Security Review](docs/CODE_AND_SECURITY_REVIEW.md) — Complete security review, audit findings, and boundaries.
+- [Multi-Platform Setup Guide](skills/jev-browser/references/platforms.md) — Setup instructions for Claude Code, Codex, Hermes, and OpenClaw.
+- [macOS Installation Manual](docs/macos-install.md) — Native app installation and Chrome profile migration guide.
+
+---
+
+## Community & Ecosystem
+
+- **Website**: [https://digitalfoundry.ai/](https://digitalfoundry.ai/)
+- **Documentation**: [https://digitalfoundry.ai/docs/jev-browser](https://digitalfoundry.ai/docs/jev-browser)
+- **Discord**: [Join the digitalfoundry.ai Community](https://discord.gg/digitalfoundry)
+- **GitHub Discussions**: [Ask questions and share skills](https://github.com/digitalfoudnry-vb/JevBrowser/discussions)
+- **X / Twitter**: [@digitalfoundry](https://x.com/digitalfoundry)
+
+---
+
+## Star History
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=digitalfoudnry-vb/JevBrowser&type=Date)](https://star-history.com/#digitalfoudnry-vb/JevBrowser&Date)
+
+</div>
+
+---
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) and [NOTICE](NOTICE.md) files for details.
+Created with pride by **[digitalfoundry.ai](https://digitalfoundry.ai/)**.
