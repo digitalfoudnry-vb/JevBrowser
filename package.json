@@ -41,6 +41,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "website": "node scripts/serve-website.mjs",
     "test": "node --test test/unit.test.mjs test/compiler.test.mjs test/security.test.mjs test/provider.test.mjs test/install.test.mjs",
     "test:e2e": "node --test test/e2e.test.mjs",
     "test:browser": "node --test test/browser.test.mjs",
