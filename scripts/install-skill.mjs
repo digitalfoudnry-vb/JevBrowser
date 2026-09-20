@@ -13,14 +13,14 @@ export const clientRoots = {
   openclaw: '.openclaw/skills',
 };
 
-export async function installSkill({ client, home = homedir(), apply = false }) {
+export async function installSkill({ client, home = homedir(), apply = false, force = false }) {
   if (client !== 'all' && !Object.hasOwn(clientRoots, client)) throw new Error('Choose claude, codex, hermes, openclaw, or all');
   const clients = client === 'all' ? Object.keys(clientRoots) : [client];
   const destinations = clients.map(name => ({ client: name, path: join(resolve(home), clientRoots[name], 'jev-browser') }));
-  // Inspect every destination before writing any of them; preserve existing installations.
+  // Inspect every destination before writing any of them; preserve existing installations unless force is requested.
   for (const item of destinations) {
     const existing = await lstat(item.path).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
-    if (existing) throw new Error(`Already exists; review it before updating: ${item.path}`);
+    if (existing && !force) throw new Error(`Already exists; review it before updating: ${item.path}`);
   }
   async function rejectLinks(directory) {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -34,6 +34,9 @@ export async function installSkill({ client, home = homedir(), apply = false }) 
     try {
       for (const item of destinations) {
         await mkdir(dirname(item.path), { recursive: true });
+        if (force) {
+          await rm(item.path, { recursive: true, force: true }).catch(() => {});
+        }
         await mkdir(item.path); // Exclusive: do not replace a raced-in installation.
         created.push(item.path);
         for (const entry of await readdir(source)) {
@@ -51,12 +54,13 @@ export async function installSkill({ client, home = homedir(), apply = false }) 
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help')) {
-    console.log('node scripts/install-skill.mjs --client claude|codex|hermes|openclaw|all [--home /path/to/home] [--apply]\nDefaults to preview only. Existing skills are never overwritten.');
+    console.log('node scripts/install-skill.mjs --client claude|codex|hermes|openclaw|all [--home /path/to/home] [--apply] [--force]\nDefaults to preview only.');
     return;
   }
   const options = {};
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--apply') options.apply = true;
+    else if (args[i] === '--force') options.force = true;
     else if (['--client', '--home'].includes(args[i]) && args[i + 1] && !args[i + 1].startsWith('--')) options[args[i].slice(2)] = args[++i];
     else throw new Error(`Unknown argument or missing value: ${args[i]}`);
   }
