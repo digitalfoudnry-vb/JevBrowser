@@ -3,9 +3,19 @@
   "source": "digitalfoudnry-vb/JevBrowser",
   "trust_level": "community",
   "verdict": "safe",
-  "findings": [],
-  "scanned_at": "2026-09-20T07:24:25.047698+00:00",
-  "summary": "jev-browser: clean scan, no threats detected",
+  "findings": [
+    {
+      "pattern_id": "other_agent_config_ref",
+      "severity": "low",
+      "category": "persistence",
+      "file": "references/platforms.md",
+      "line": 85,
+      "match": "Merge this block into your Codex `config.toml` (normally `~/.codex/config.toml`):",
+      "description": "references other agent configuration files (informational; only modification intent is scored)"
+    }
+  ],
+  "scanned_at": "2026-09-20T07:30:31.176158+00:00",
+  "summary": "jev-browser: safe \u2014 1 finding(s) in persistence",
   "scan_provenance": {},
   "scanner_commit": "c6550d87c7e75127fabf9b7ccec81099f86c0db5",
   "scanner_version": "skills-guard-v5",

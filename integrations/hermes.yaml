@@ -1,0 +1,9 @@
+mcp_servers:
+  jev-browser:
+    command: node
+    args:
+      - --env-file=/absolute/path/to/jev-browser.env
+      - /absolute/path/to/JevBrowser/dist/index.js
+    timeout: 210
+    tools:
+      include: [jev_navigate]

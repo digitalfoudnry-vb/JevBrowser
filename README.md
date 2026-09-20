@@ -1,8 +1,8 @@
 # Jev Browser Skill
 
-A reusable browser skill and local MCP server for Hermes and other agents. The skill is packaged in [`jevskills/jev-browser`](jevskills/jev-browser/SKILL.md). Jev selects browser actions through Vercel AI Gateway; Playwright executes them. The host agent uses its normal chat model.
+A reusable browser skill and local MCP server for **Claude Code, Codex, Hermes and OpenClaw**. The skill is packaged in [`jevskills/jev-browser`](jevskills/jev-browser/SKILL.md). Jev selects browser actions through Vercel AI Gateway; Playwright executes them. The host agent uses its normal chat model.
 
-This is an independent, MIT-licensed derivative of [jkudish/jev-browser](https://github.com/jkudish/jev-browser), with security and reliability changes. See [NOTICE](NOTICE.md), [security review](docs/security-review.md) and [security boundaries](SECURITY.md). It is not an official Hermes integration or a security certification.
+This is an independent, MIT-licensed derivative of [jkudish/jev-browser](https://github.com/jkudish/jev-browser), with security and reliability changes. See [NOTICE](NOTICE.md), [security review](docs/security-review.md) and [security boundaries](SECURITY.md). It is not an official vendor integration or a security certification.
 
 ## Setup
 
@@ -25,7 +25,18 @@ AI_GATEWAY_API_KEY=<your Vercel AI Gateway key>
 
 Create the key in [Vercel AI Gateway](https://vercel.com/docs/ai-gateway/getting-started). Do not commit it. No deployment to Vercel is required.
 
-See [Hermes setup](docs/hermes.md) for MCP configuration and skill installation. Other MCP clients use command `node` and args `[/absolute/path/to/jev-browser-skill/dist/index.js]`, with the two environment variables above.
+See the [four-platform setup guide](jevskills/jev-browser/references/platforms.md) for skill locations, MCP registration, configuration examples and verification.
+
+Preview skill installation for all four clients, then apply it when ready:
+
+```sh
+node scripts/install-skill.mjs --client all
+node scripts/install-skill.mjs --client all --apply
+```
+
+Select one client with `--client claude`, `codex`, `hermes` or `openclaw`. Existing installations are never overwritten. The installer copies skills only; it does not change host settings or credentials. Register the MCP server separately using the guide or the templates in `integrations/`.
+
+This package targets local agent runtimes with Node/Chromium access. Cloud-only chats need a separately deployed connector, which is not provided here.
 
 ## Use
 

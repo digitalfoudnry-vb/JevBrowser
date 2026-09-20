@@ -6,7 +6,7 @@ From the checkout, install the locked dependencies with `npm ci --ignore-scripts
 
 For Vercel decisions, configure `JEV_PROVIDER=vercel` and `AI_GATEWAY_API_KEY` in the MCP server's environment. Get the key from the Vercel AI Gateway dashboard; use a protected local secret store or environment file, never chat or a committed config. The adapter calls `typesafe-ai/jev` through the evaluation API.
 
-Register the local server with command `node` and argument `/absolute/path/to/jev-browser-skill/dist/index.js`. The path must point to the built checkout. Configure secret environment variables explicitly if the client filters inherited variables. In Hermes use its MCP configuration, not Custom Endpoints. See the repository's `docs/hermes.md` for the complete example.
+Register the local server with command `node` and argument `/absolute/path/to/jev-browser-skill/dist/index.js`. The path must point to the built checkout. Configure secret environment variables explicitly if the client filters inherited variables. Use the host's MCP configuration. See [platform setup](platforms.md) for Claude Code, Codex, Hermes and OpenClaw examples. In Hermes this is separate from Custom Endpoints.
 
 To generate field text through Vercel, also configure:
 

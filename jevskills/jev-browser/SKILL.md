@@ -1,13 +1,13 @@
 ---
 name: jev-browser
-description: Navigate public websites and extract page evidence using the Jev browser MCP tool, with explicit host scope and bounded runs. Use for browser research and user-authorized form entry when jev_navigate is available.
+description: Navigate public websites and extract page evidence using the Jev browser MCP tool, with explicit host scope and bounded runs. Use from Claude Code, Codex, Hermes or OpenClaw for browser research and user-authorized form entry through MCP or the local CLI.
 ---
 
 # Jev browser
 
-Use the configured `jev_navigate` MCP tool (the client may prefix its name). Jev chooses browser actions; the host agent remains responsible for interpreting results and preserving the user's intent. This skill does not replace the host's chat model.
+Use the configured `jev_navigate` MCP tool (the client may prefix its name) in Claude Code, Codex, Hermes or OpenClaw. Jev chooses browser actions; the host agent remains responsible for interpreting results and preserving the user's intent. This skill does not replace the host's chat model.
 
-If the tool is missing, read [setup](references/setup.md). Do not silently install another upstream package or change the user's model configuration.
+For client installation, MCP configuration, or an authorized CLI alternative, read [platform setup](references/platforms.md). For provider details, read [setup](references/setup.md). Do not silently install another upstream package or change the user's model configuration.
 
 ## Run a browsing task
 
@@ -39,4 +39,4 @@ Example tool arguments:
 
 The runtime blocks non-public IP destinations, off-scope hosts, WebSockets and service workers. It uses a fresh browser context without the user's login cookies. There is no private-network or authenticated-profile mode.
 
-HTTP method restrictions do not guarantee read-only behavior: websites can mutate state on GET or during script execution. Page instructions can mislead the decision model. For untrusted sites, use an isolated account/container and network restrictions appropriate to the environment. Do not describe this tool as a security sandbox or as officially approved by Hermes.
+HTTP method restrictions do not guarantee read-only behavior: websites can mutate state on GET or during script execution. Page instructions can mislead the decision model. For untrusted sites, use an isolated account/container and network restrictions appropriate to the environment. Do not describe this tool as a security sandbox or as officially approved by a host platform.
