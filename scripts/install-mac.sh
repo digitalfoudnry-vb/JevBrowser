@@ -46,8 +46,11 @@ node scripts/install-skill.mjs --client all --apply || true
 
 echo "==> Packaging native macOS Application..."
 bash scripts/build-macos-app.sh
+mkdir -p "${HOME}/Applications"
+rm -rf "${HOME}/Applications/Jev Browser.app"
+cp -R "dist/macos/Jev Browser.app" "${HOME}/Applications/"
 
-# Link binary to /usr/local/bin if writable or suggest PATH
+# Link binary to ~/.local/bin
 mkdir -p "${HOME}/.local/bin"
 ln -sf "${INSTALL_DIR}/dist/index.js" "${HOME}/.local/bin/jev-browser"
 
