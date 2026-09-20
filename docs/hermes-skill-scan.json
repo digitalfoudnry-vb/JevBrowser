@@ -1,0 +1,13 @@
+{
+  "skill_name": "jev-browser",
+  "source": "digitalfoudnry-vb/JevBrowser",
+  "trust_level": "community",
+  "verdict": "safe",
+  "findings": [],
+  "scanned_at": "2026-09-20T07:24:25.047698+00:00",
+  "summary": "jev-browser: clean scan, no threats detected",
+  "scan_provenance": {},
+  "scanner_commit": "c6550d87c7e75127fabf9b7ccec81099f86c0db5",
+  "scanner_version": "skills-guard-v5",
+  "install_allowed": true
+}
