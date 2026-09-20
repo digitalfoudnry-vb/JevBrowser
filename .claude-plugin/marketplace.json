@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "jev-agent-skills",
+  "description": "Autonomous browser automation powered by Jev Engine for AI agents",
+  "owner": {
+    "name": "digitalfoudnry-vb",
+    "email": "contact@digitalfoundry.ai"
+  },
+  "metadata": {
+    "description": "Jev Browser skills for autonomous web tasks",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "browser-skills",
+      "description": "Automates browser interactions for web testing, form filling, screenshots, and data extraction powered by Jev",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/jev-browser"],
+      "category": "development"
+    }
+  ]
+}

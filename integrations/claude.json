@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "jev-browser": {
+      "command": "node",
+      "args": ["dist/index.js", "mcp"],
+      "env": {
+        "JEV_PROVIDER": "vercel",
+        "AI_GATEWAY_API_KEY": "${AI_GATEWAY_API_KEY}"
+      }
+    }
+  }
+}

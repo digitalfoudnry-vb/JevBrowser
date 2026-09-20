@@ -1,0 +1,13 @@
+{
+  "tools": {
+    "mcpServers": {
+      "jev-browser": {
+        "command": "node",
+        "args": ["dist/index.js", "mcp"],
+        "env": {
+          "JEV_PROVIDER": "vercel"
+        }
+      }
+    }
+  }
+}
