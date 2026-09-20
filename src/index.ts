@@ -8,10 +8,13 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { createRequire } from "node:module";
 import { navigate } from "./navigate.js";
-import { runCli } from "./cli.js";
+import { runCli, runNodejsCli } from "./cli.js";
 
 if (process.argv[2] === "run") {
   process.exit(await runCli(process.argv.slice(3)));
+}
+if (process.argv[2] === "nodejs") {
+  process.exit(await runNodejsCli(process.argv.slice(3)));
 }
 if (process.argv[2] === "--help" || process.argv[2] === "-h") {
   process.exit(await runCli(["--help"]));

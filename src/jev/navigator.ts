@@ -221,6 +221,7 @@ export async function jevNavigate(
         true_length: finalContent.length,
         content: finalContent.slice(0, options.maxChars ?? 16000),
       },
+      extracted_content: finalContent.slice(0, options.maxChars ?? 16000),
       screenshot_base64_jpeg: screenshotBase64,
       usage,
       elapsed_ms: Math.round(performance.now() - started),

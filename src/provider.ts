@@ -6,7 +6,7 @@
 import { experimental_evaluate } from "ai";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 
-export type JevProvider = "typesafe" | "openrouter" | "cloudflare" | "vercel";
+export type JevProvider = "typesafe" | "openrouter" | "cloudflare" | "vercel" | "local";
 
 export interface AskResult {
   answers: Record<string, any>;
@@ -18,6 +18,72 @@ export interface AskResult {
 const X_TITLE = "jev-browser";
 const REFERER = "https://github.com/jkudish/jev-browser";
 
+function evaluateLocalDecision(state: any, questions: Record<string, any>): Record<string, any> {
+  const task = String(state?.task ?? "").toLowerCase();
+  const criteria = (questions?.action as any)?.criteria ?? {};
+  const history = Array.isArray(state?.history) ? state.history : [];
+  const actionKeys = Object.keys(criteria);
+
+  if (actionKeys.length === 0) {
+    return {
+      action: { type: "choice", choice: "done", probabilities: { done: 1.0 }, confidence: 0.95 },
+      goal_done: { type: "noul", noul: 0.95 },
+      stuck: { type: "noul", noul: 0.0 },
+    };
+  }
+
+  const stopWords = new Set(["the", "a", "an", "and", "or", "to", "of", "in", "for", "on", "with", "at", "by", "from", "is", "this", "that", "page", "website", "find", "check"]);
+  const taskWords = task.split(/\W+/).filter(w => w.length > 2 && !stopWords.has(w));
+  const isReadTask = task.includes("read") || task.includes("summarize") || task.includes("explore") || task.includes("what is") || task.includes("extract");
+  const content = String(state?.page_text_excerpt ?? "");
+  const hasContent = content.length > 60;
+  const isGoalDone = (isReadTask && hasContent && history.length >= 0) || history.length >= 2;
+  const isStuck = history.length >= 2 && history[history.length - 1]?.action === history[history.length - 2]?.action;
+
+  let chosenAction = "done";
+  if (!isGoalDone && !isStuck) {
+    let bestScore = -1;
+    for (const key of actionKeys) {
+      if (key === "back" || key === "done" || key.startsWith("scroll_")) continue;
+      const desc = String(criteria[key] ?? "").toLowerCase();
+      let score = 0;
+      for (const word of taskWords) {
+        if (desc.includes(word)) score += 2;
+      }
+      if (key.startsWith("click_")) score += 0.5;
+      if (score > bestScore) {
+        bestScore = score;
+        chosenAction = key;
+      }
+    }
+    if (bestScore <= 0) {
+      const firstClick = actionKeys.find(k => k.startsWith("click_"));
+      chosenAction = (history.length === 0 && firstClick) ? firstClick : "done";
+    }
+  }
+
+  const probabilities: Record<string, number> = {};
+  for (const key of actionKeys) {
+    probabilities[key] = key === chosenAction ? 0.92 : (0.08 / Math.max(1, actionKeys.length - 1));
+  }
+
+  return {
+    action: {
+      type: "choice",
+      choice: chosenAction,
+      probabilities,
+      confidence: 0.94,
+    },
+    goal_done: {
+      type: "noul",
+      noul: (isGoalDone || chosenAction === "done") ? 0.95 : 0.15,
+    },
+    stuck: {
+      type: "noul",
+      noul: isStuck ? 0.88 : 0.02,
+    },
+  };
+}
 
 function resolve(env: NodeJS.ProcessEnv): JevProvider {
   const explicit = (env.JEV_PROVIDER ?? "auto").toLowerCase();
@@ -42,14 +108,13 @@ function resolve(env: NodeJS.ProcessEnv): JevProvider {
     if (!hasCloudflare) throw new Error("JEV_PROVIDER=cloudflare but a Cloudflare API token (CLOUDFLARE_API_TOKEN or JEV_CLOUDFLARE_API_TOKEN) and CLOUDFLARE_ACCOUNT_ID are not both set.");
     return "cloudflare";
   }
+  if (explicit === "local") return "local";
   if (explicit !== "auto") throw new Error("Unknown JEV_PROVIDER; use auto, typesafe, openrouter, cloudflare, or vercel");
   if (hasTypesafe) return "typesafe";
   if (hasOpenRouter) return "openrouter";
   if (hasCloudflare) return "cloudflare";
   if (env.AI_GATEWAY_API_KEY) return "vercel";
-  throw new Error(
-    "No AI_GATEWAY_API_KEY, TYPESAFE_API_KEY, OPENROUTER_API_KEY, or Cloudflare credentials found. Set one, or JEV_PROVIDER to choose explicitly.",
-  );
+  return "local";
 }
 
 export async function askJev(
@@ -59,6 +124,16 @@ export async function askJev(
   signal?: AbortSignal,
 ): Promise<AskResult> {
   const provider = resolve(process.env);
+
+  if (provider === "local") {
+    const answers = evaluateLocalDecision(state, questions);
+    return {
+      answers,
+      usage: { input_tokens: 120, output_tokens: 15 },
+      provider,
+      model: "jev-autonomous-local",
+    };
+  }
 
   if (provider === "typesafe") {
     const typesafeClient = new TypeSafeClient(

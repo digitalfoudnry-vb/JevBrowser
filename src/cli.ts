@@ -154,3 +154,45 @@ export async function runCli(argv: string[]): Promise<number> {
     }
   }
 }
+
+export async function runNodejsCli(argv: string[]): Promise<number> {
+  const { taskSpace, profiles, listTaskSpaces } = await import("./browser/task-space.js");
+  const { jevNavigate } = await import("./jev/navigator.js");
+
+  let code = "";
+  if (argv[0] === "-e" || argv[0] === "--eval") {
+    code = argv[1] || "";
+  } else if (argv.length > 0 && !argv[0].startsWith("-")) {
+    const fs = await import("node:fs/promises");
+    code = await fs.readFile(argv[0], "utf-8");
+  } else {
+    const chunks: Buffer[] = [];
+    for await (const chunk of process.stdin) {
+      chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+    }
+    code = Buffer.concat(chunks).toString("utf-8");
+  }
+
+  if (!code.trim()) {
+    console.error("No script provided to jev-browser nodejs");
+    return 1;
+  }
+
+  try {
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    const runner = new AsyncFunction(
+      "taskSpace",
+      "profiles",
+      "listTaskSpaces",
+      "jevNavigate",
+      "navigate",
+      code
+    );
+    await runner(taskSpace, profiles, listTaskSpaces, jevNavigate, navigate);
+    return 0;
+  } catch (error) {
+    console.error(safeError(error));
+    return 1;
+  }
+}
+
