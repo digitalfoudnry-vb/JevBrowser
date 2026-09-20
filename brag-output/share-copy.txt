@@ -1,0 +1,6 @@
+Most AI browser agents hijack your desktop and choke on megabytes of raw DOM tokens. 
+
+We built Jev Browser: isolated parallel task spaces powered by probabilistic decision intelligence that plans, acts, and self-heals in seconds.
+
+Install: npm install -g @digitalfoudnry-vb/jev-browser
+GitHub: https://github.com/digitalfoudnry-vb/JevBrowser

@@ -7,9 +7,25 @@
 
 </div>
 
-A reusable browser skill and local MCP server for **Claude Code, Codex, Hermes and OpenClaw**. The skill is packaged in [`jevskills/jev-browser`](jevskills/jev-browser/SKILL.md). Jev selects browser actions through Vercel AI Gateway; Playwright executes them. The host agent uses its normal chat model.
+A reusable browser skill, autonomous browser engine, and local MCP server for **Claude Code, Codex, Hermes, and OpenClaw**. Powered by Jev Decision Intelligence, with native Playwright automation, DOM action compilation, and enterprise safety controls.
 
-This is an independent, MIT-licensed derivative of [jkudish/jev-browser](https://github.com/jkudish/jev-browser), with security and reliability changes. See [NOTICE](NOTICE.md), [security review](docs/security-review.md) and [security boundaries](SECURITY.md). It is not an official vendor integration or a security certification.
+<div align="center">
+
+[![Watch Launch Video](brag-output/brag.jpg)](brag-output/brag.mp4)
+
+*🎬 Official Launch Intro — [Watch Video (MP4)](brag-output/brag.mp4) | [Architecture Guide](docs/ARCHITECTURE.md)*
+
+</div>
+
+This is an independent, MIT-licensed autonomous browser system powered by Jev. See [Architecture](docs/ARCHITECTURE.md), [Agent Rules](AGENTS.md), [NOTICE](NOTICE.md), [Security Review](docs/security-review.md), and [Security Boundaries](SECURITY.md).
+
+## Highlights & Features
+
+- **Autonomous Jev Decision Engine**: Jev evaluates page states and selects precise DOM actions with sub-millisecond AST filtering.
+- **Standalone & MCP Modes**: Run as a standalone autonomous browser CLI, a TypeScript library API, or a standard Model Context Protocol (MCP) server.
+- **Multi-Client Support**: Out-of-the-box skills and configs for Claude Code, Codex CLI, Hermes Agent, and OpenClaw.
+- **Zero Hallucination Action Spaces**: DOM compiler filters out noisy tracking pixels, redundant wrappers, and non-interactive nodes to present compact choice spaces.
+- **Strict Security Boundaries**: Strict host allowlists, SSRF protections, public IP enforcement, credential masking, and mutation gating.
 
 ## Setup
 

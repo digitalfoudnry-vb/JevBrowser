@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'SFMono-Regular';
+        src: local('SFMono-Regular');
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #07090e;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #f8fafc;
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 15%, #151d36 0%, #07090e 75%);
+      }
+
+      /* Grid & Glow Atmosphere */
+      .grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image: 
+          linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        opacity: 0.7;
+        pointer-events: none;
+      }
+      .ambient-glow {
+        position: absolute;
+        width: 800px;
+        height: 800px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(99, 102, 241, 0.08) 45%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        filter: blur(80px);
+        pointer-events: none;
+      }
+
+      /* Persistent Top HUD Bar */
+      .top-hud {
+        position: absolute;
+        top: 40px;
+        left: 80px;
+        right: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 50;
+      }
+      .brand-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        padding: 8px 18px;
+        border-radius: 9999px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      }
+      .brand-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 10px #38bdf8;
+      }
+      .brand-name {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #f8fafc;
+      }
+      .version-tag {
+        font-size: 12px;
+        font-weight: 600;
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.12);
+        padding: 2px 8px;
+        border-radius: 6px;
+      }
+      .hud-status {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .pulse-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 8px #10b981;
+      }
+
+      /* Scene Wrappers */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 100px 120px 60px;
+        pointer-events: none;
+      }
+      .scene-content {
+        width: 100%;
+        max-width: 1400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .scene-header {
+        text-align: center;
+        margin-bottom: 36px;
+      }
+      .scene-title {
+        font-size: 48px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: #ffffff;
+        margin-bottom: 12px;
+      }
+      .scene-title span.accent {
+        color: #38bdf8;
+        text-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+      }
+      .scene-title span.emerald {
+        color: #34d399;
+        text-shadow: 0 0 25px rgba(52, 211, 153, 0.5);
+      }
+      .scene-subtitle {
+        font-size: 20px;
+        color: #94a3b8;
+        font-weight: 400;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.5;
+      }
+
+      /* Scene 1: Terminal */
+      .terminal-window {
+        width: 1080px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 16px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.15);
+        overflow: hidden;
+      }
+      .terminal-header {
+        background: rgba(30, 41, 59, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .terminal-controls {
+        display: flex;
+        gap: 8px;
+      }
+      .terminal-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .dot-red { background: #ef4444; }
+      .dot-yellow { background: #eab308; }
+      .dot-green { background: #22c55e; }
+      .terminal-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #94a3b8;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      .terminal-body {
+        padding: 32px 36px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 20px;
+        line-height: 1.7;
+        color: #f8fafc;
+        min-height: 240px;
+      }
+      .prompt-line {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .prompt-sign {
+        color: #38bdf8;
+        font-weight: 700;
+      }
+      .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 22px;
+        background: #38bdf8;
+        vertical-align: middle;
+        box-shadow: 0 0 8px #38bdf8;
+      }
+      .terminal-output {
+        color: #94a3b8;
+        font-size: 16px;
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .out-success {
+        color: #34d399;
+      }
+      .out-info {
+        color: #38bdf8;
+      }
+
+      /* Scene 2: Parallel Workspaces */
+      .dual-workspace {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+        width: 100%;
+        max-width: 1280px;
+      }
+      .workspace-card {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        padding: 32px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+      }
+      .workspace-card.active-card {
+        border: 1.5px solid rgba(56, 189, 248, 0.5);
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(20, 30, 55, 0.95) 100%);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(56, 189, 248, 0.2);
+      }
+      .card-header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .card-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: #ffffff;
+      }
+      .status-pill {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 9999px;
+      }
+      .pill-slate {
+        background: rgba(148, 163, 184, 0.15);
+        color: #cbd5e1;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+      }
+      .pill-emerald {
+        background: rgba(52, 211, 153, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(52, 211, 153, 0.35);
+        box-shadow: 0 0 12px rgba(52, 211, 153, 0.2);
+      }
+      .tab-cluster {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin: 16px 0;
+      }
+      .tab-item {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 15px;
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .tab-item.jev-active {
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        color: #ffffff;
+      }
+      .tab-tag {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #f1f5f9;
+      }
+      .card-footer-metrics {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #94a3b8;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      /* Scene 3: Snapshots & Probability Engine */
+      .browser-engine-split {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 32px;
+        width: 100%;
+        max-width: 1340px;
+      }
+      .mock-browser {
+        background: #0f172a;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        position: relative;
+      }
+      .browser-topbar {
+        background: #1e293b;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .url-bar {
+        flex: 1;
+        background: #090d16;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #38bdf8;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      .browser-body {
+        padding: 30px;
+        position: relative;
+        min-height: 420px;
+      }
+      .web-hero {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px dashed rgba(255, 255, 255, 0.15);
+        margin-bottom: 24px;
+      }
+      .web-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 10px;
+      }
+      .web-p {
+        font-size: 15px;
+        color: #cbd5e1;
+        line-height: 1.5;
+      }
+      .interactive-row {
+        display: flex;
+        gap: 18px;
+        margin-top: 24px;
+      }
+      .snapshot-btn {
+        position: relative;
+        background: #1e293b;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 14px 22px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .snapshot-btn.target-action {
+        background: rgba(56, 189, 248, 0.2);
+        border: 2px solid #38bdf8;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+      }
+      .ref-tag {
+        font-size: 11px;
+        font-weight: 800;
+        padding: 3px 6px;
+        border-radius: 4px;
+        background: #38bdf8;
+        color: #07090e;
+      }
+      .hud-cursor {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        z-index: 100;
+        pointer-events: none;
+      }
+      .cursor-pointer {
+        width: 0;
+        height: 0;
+        border-left: 18px solid #38bdf8;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        transform: rotate(-35deg);
+        filter: drop-shadow(0 0 8px #38bdf8);
+      }
+      .click-ripple {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 3px solid #34d399;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+      }
+
+      /* Decision Engine Pane */
+      .decision-panel {
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(52, 211, 153, 0.35);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+      }
+      .panel-head {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #34d399;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-sub {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-bottom: 24px;
+      }
+      .probability-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .prob-item {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 8px;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .prob-item.winner {
+        border: 1px solid rgba(52, 211, 153, 0.4);
+        background: rgba(52, 211, 153, 0.08);
+      }
+      .prob-label-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .prob-action {
+        color: #f8fafc;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      .prob-val {
+        color: #34d399;
+        font-weight: 700;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      .prob-bar-track {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+        overflow: hidden;
+      }
+      .prob-bar-fill {
+        height: 100%;
+        border-radius: 9999px;
+      }
+      .fill-green {
+        background: linear-gradient(90deg, #10b981, #34d399);
+        box-shadow: 0 0 10px #34d399;
+      }
+      .fill-slate {
+        background: #64748b;
+      }
+
+      /* Scene 4: Goal Completed & Markdown Card */
+      .completed-container {
+        width: 1000px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(52, 211, 153, 0.4);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 45px rgba(52, 211, 153, 0.18);
+      }
+      .complete-badge-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 28px;
+      }
+      .success-flag {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 20px;
+        font-weight: 800;
+        color: #34d399;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .metrics-strip {
+        display: flex;
+        gap: 24px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 14px;
+      }
+      .metric-pill {
+        color: #cbd5e1;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 6px 14px;
+        border-radius: 6px;
+      }
+      .metric-pill span {
+        color: #38bdf8;
+        font-weight: 700;
+      }
+      .markdown-card {
+        background: rgba(8, 13, 26, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 28px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 16px;
+        line-height: 1.8;
+      }
+      .md-h1 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #38bdf8;
+        margin-bottom: 14px;
+      }
+      .md-bullet {
+        color: #f8fafc;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .md-check {
+        color: #34d399;
+        font-weight: 700;
+      }
+
+      /* Scene 5: Outro Hero */
+      .outro-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        max-width: 900px;
+      }
+      .brand-logo-img {
+        width: 26px;
+        height: 22px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.7));
+      }
+      .logo-image-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        position: relative;
+      }
+      .hero-logo-img {
+        width: 144px;
+        height: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 0 35px rgba(56, 189, 248, 0.8)) drop-shadow(0 0 70px rgba(99, 102, 241, 0.5));
+      }
+      .outro-title {
+        font-size: 76px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+        background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 16px;
+      }
+      .outro-tagline {
+        font-size: 24px;
+        color: #38bdf8;
+        font-weight: 500;
+        margin-bottom: 36px;
+      }
+      .install-card {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1.5px solid rgba(56, 189, 248, 0.4);
+        padding: 18px 36px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 20px;
+        color: #f8fafc;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(56, 189, 248, 0.25);
+        margin-bottom: 28px;
+      }
+      .install-card span.cmd-prompt {
+        color: #34d399;
+        font-weight: 700;
+      }
+      .feature-badges {
+        display: flex;
+        gap: 14px;
+      }
+      .feat-badge {
+        font-size: 13px;
+        font-weight: 600;
+        color: #94a3b8;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 6px 14px;
+        border-radius: 9999px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Background Visuals -->
+      <div class="grid-bg"></div>
+      <div id="ambient-glow" class="ambient-glow"></div>
+
+      <!-- Persistent Top HUD -->
+      <div class="top-hud">
+        <div class="brand-badge">
+          <img id="hud-logo-img" src="assets/logo-hud.png" alt="Jev" class="brand-logo-img" />
+          <div class="brand-name">Jev Browser</div>
+          <div class="version-tag">v0.1.0</div>
+        </div>
+        <div class="hud-status">
+          <div class="pulse-indicator"></div>
+          <span>Autonomous Workspace Engine</span>
+        </div>
+      </div>
+
+      <!-- AUDIO TRACKS -->
+      <audio
+        id="bg-music"
+        data-start="0"
+        data-duration="20"
+        data-track-index="10"
+        data-volume="0.35"
+        src="assets/music/track.mp3"
+      ></audio>
+      <audio
+        id="sfx-enter"
+        data-start="2.6"
+        data-duration="0.05"
+        data-track-index="11"
+        data-volume="0.75"
+        src="assets/sfx/interface/click_002.ogg"
+      ></audio>
+      <audio
+        id="sfx-reveal"
+        data-start="3.2"
+        data-duration="0.19"
+        data-track-index="12"
+        data-volume="0.80"
+        src="assets/sfx/impact/impactSoft_medium_001.ogg"
+      ></audio>
+      <audio
+        id="sfx-click"
+        data-start="10.5"
+        data-duration="0.05"
+        data-track-index="13"
+        data-volume="0.75"
+        src="assets/sfx/interface/click_002.ogg"
+      ></audio>
+      <audio
+        id="sfx-complete"
+        data-start="13.0"
+        data-duration="0.11"
+        data-track-index="14"
+        data-volume="0.80"
+        src="assets/sfx/interface/drop_001.ogg"
+      ></audio>
+      <audio
+        id="sfx-outro"
+        data-start="16.8"
+        data-duration="1.48"
+        data-track-index="15"
+        data-volume="0.85"
+        src="assets/sfx/impact/impactBell_heavy_000.ogg"
+      ></audio>
+
+      <!-- SCENE 1: CLI HOOK (0.0s - 3.2s) -->
+      <div id="scene-1" class="scene">
+        <div class="scene-content">
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <div class="terminal-controls">
+                <div class="terminal-dot dot-red"></div>
+                <div class="terminal-dot dot-yellow"></div>
+                <div class="terminal-dot dot-green"></div>
+              </div>
+              <div class="terminal-title">zsh — 80x24 — jev-browser</div>
+              <div style="width: 50px;"></div>
+            </div>
+            <div class="terminal-body">
+              <div class="prompt-line">
+                <span class="prompt-sign">$</span>
+                <span id="typed-text"></span>
+                <span id="term-cursor" class="cursor"></span>
+              </div>
+              <div id="term-out-1" class="terminal-output" style="opacity: 0;">
+                <div class="out-info">⬡ [jev-browser] Spawning isolated TaskSpace #1 (session 8f2a)...</div>
+                <div class="out-success">✔ CDP context attached · zero interference with local Chrome</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 2: PARALLEL ISOLATION (3.2s - 7.5s) -->
+      <div id="scene-2" class="scene" style="opacity: 0;">
+        <div class="scene-content">
+          <div class="scene-header">
+            <h2 class="scene-title">Parallel Workspaces. <span class="accent">Zero Hijacking.</span></h2>
+            <p class="scene-subtitle">Run autonomous multi-tab agent workflows in private sandboxes while you keep browsing.</p>
+          </div>
+          <div class="dual-workspace">
+            <!-- User Workspace Card -->
+            <div class="workspace-card">
+              <div class="card-header-bar">
+                <div class="card-name">User Browser Profile</div>
+                <div class="status-pill pill-slate">● Untouched</div>
+              </div>
+              <div class="tab-cluster">
+                <div class="tab-item"><span class="tab-tag">Tab 1</span> GitHub · PR #412 Code Review</div>
+                <div class="tab-item"><span class="tab-tag">Tab 2</span> Linear · Sprint Planning 2026</div>
+                <div class="tab-item"><span class="tab-tag">Tab 3</span> Figma · Design System Tokens</div>
+              </div>
+              <div class="card-footer-metrics">
+                <span>Active User Cookies: Intact</span>
+                <span>Screen Control: 100% User</span>
+              </div>
+            </div>
+
+            <!-- Jev Task Space Card -->
+            <div class="workspace-card active-card">
+              <div class="card-header-bar">
+                <div class="card-name" style="display: flex; align-items: center; gap: 10px;">
+                  <img id="badge-logo-img" src="assets/logo-badge.png" alt="" style="width: 24px; height: 21px; object-fit: contain;" />
+                  Jev Task Space #1
+                </div>
+                <div class="status-pill pill-emerald">● Autonomous Sandbox</div>
+              </div>
+              <div class="tab-cluster">
+                <div class="tab-item jev-active">
+                  <span class="tab-tag" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">Goal</span>
+                  Find Python 3.13 key features
+                </div>
+                <div class="tab-item">
+                  <span class="tab-tag">Target</span>
+                  https://www.python.org
+                </div>
+                <div class="tab-item">
+                  <span class="tab-tag" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">Engine</span>
+                  Jev Action Probability Compiler
+                </div>
+              </div>
+              <div class="card-footer-metrics">
+                <span style="color: #38bdf8;">PID: 41829 · Sandboxed CDP</span>
+                <span style="color: #34d399;">Multi-Client Enabled</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 3: SNAPSHOTS & DECISION ENGINE (7.5s - 13.0s) -->
+      <div id="scene-3" class="scene" style="opacity: 0;">
+        <div class="scene-content">
+          <div class="scene-header">
+            <h2 class="scene-title">Structured Snapshots. <span class="emerald">Probabilistic Action.</span></h2>
+            <p class="scene-subtitle">No massive DOM tokens. Jev scores 240+ candidates and executes with precision.</p>
+          </div>
+          <div class="browser-engine-split">
+            <!-- Mock Webpage Viewport -->
+            <div class="mock-browser">
+              <div class="browser-topbar">
+                <div class="terminal-controls">
+                  <div class="terminal-dot dot-red"></div>
+                  <div class="terminal-dot dot-yellow"></div>
+                  <div class="terminal-dot dot-green"></div>
+                </div>
+                <div class="url-bar">https://www.python.org/downloads/</div>
+              </div>
+              <div class="browser-body">
+                <div class="web-hero">
+                  <div class="web-title">Python 3.13.0 Release</div>
+                  <div class="web-p">Python is an interpreted, high-level and general-purpose programming language.</div>
+                  <div class="interactive-row">
+                    <div class="snapshot-btn">
+                      <span class="ref-tag">@1</span>
+                      Documentation
+                    </div>
+                    <div id="target-btn" class="snapshot-btn target-action">
+                      <span class="ref-tag" style="background: #34d399;">@2</span>
+                      Download Python 3.13
+                    </div>
+                    <div class="snapshot-btn">
+                      <span class="ref-tag">@3</span>
+                      Source Code
+                    </div>
+                  </div>
+                </div>
+                <!-- Animated HUD Cursor -->
+                <div id="hud-cursor" class="hud-cursor" style="left: 450px; top: 290px;">
+                  <div class="cursor-pointer"></div>
+                  <div id="click-ripple" class="click-ripple"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Jev Decision Matrix -->
+            <div class="decision-panel">
+              <div class="panel-head">
+                <div class="brand-dot" style="background: #34d399; box-shadow: 0 0 10px #34d399;"></div>
+                Jev Decision Matrix
+              </div>
+              <div class="panel-sub">Ranked Action Probabilities (240 DOM elements)</div>
+              <div class="probability-list">
+                <div class="prob-item winner">
+                  <div class="prob-label-row">
+                    <span class="prob-action">click_e2 [Download 3.13]</span>
+                    <span class="prob-val">94.2%</span>
+                  </div>
+                  <div class="prob-bar-track">
+                    <div id="bar-fill-1" class="prob-bar-fill fill-green" style="width: 0%;"></div>
+                  </div>
+                </div>
+                <div class="prob-item">
+                  <div class="prob-label-row">
+                    <span class="prob-action">scroll_down [Page Body]</span>
+                    <span class="prob-val" style="color: #94a3b8;">4.1%</span>
+                  </div>
+                  <div class="prob-bar-track">
+                    <div id="bar-fill-2" class="prob-bar-fill fill-slate" style="width: 0%;"></div>
+                  </div>
+                </div>
+                <div class="prob-item">
+                  <div class="prob-label-row">
+                    <span class="prob-action">navigate_back []</span>
+                    <span class="prob-val" style="color: #94a3b8;">1.7%</span>
+                  </div>
+                  <div class="prob-bar-track">
+                    <div id="bar-fill-3" class="prob-bar-fill fill-slate" style="width: 0%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: auto; padding-top: 16px; font-size: 13px; color: #34d399; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">
+                ✔ Status: Compiled & Verified
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 4: GOAL COMPLETED (13.0s - 16.8s) -->
+      <div id="scene-4" class="scene" style="opacity: 0;">
+        <div class="scene-content">
+          <div class="scene-header">
+            <h2 class="scene-title">Done in 4 Steps. <span class="accent">Ready for Agents.</span></h2>
+            <p class="scene-subtitle">Autonomous navigation, extraction, and structured markdown delivery in seconds.</p>
+          </div>
+          <div class="completed-container">
+            <div class="complete-badge-strip">
+              <div class="success-flag">
+                <img id="icon-logo-img" src="assets/logo-icon.png" alt="" style="width: 26px; height: 22px; object-fit: contain;" />
+                Goal Completed Successfully
+              </div>
+              <div class="metrics-strip">
+                <div class="metric-pill"><span>4</span> Steps</div>
+                <div class="metric-pill"><span>1.8s</span> Latency</div>
+                <div class="metric-pill"><span>$0.0004</span> Token Cost</div>
+              </div>
+            </div>
+            <div class="markdown-card">
+              <div class="md-h1"># Python 3.13 Key Release Features</div>
+              <div class="md-bullet">
+                <span class="md-check">✓</span>
+                <span>Free-threaded CPython (PEP 703 — GIL disabled in experimental builds)</span>
+              </div>
+              <div class="md-bullet">
+                <span class="md-check">✓</span>
+                <span>Preliminary JIT compiler for high-speed runtime byte compilation</span>
+              </div>
+              <div class="md-bullet">
+                <span class="md-check">✓</span>
+                <span>Revamped interactive REPL with syntax coloring and multi-line editing</span>
+              </div>
+              <div class="md-bullet">
+                <span class="md-check">✓</span>
+                <span>Improved precision tracebacks pointing directly to faulty expressions</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 5: OUTRO HERO (16.8s - 20.0s) -->
+      <div id="scene-5" class="scene" style="opacity: 0;">
+        <div class="scene-content">
+          <div class="outro-box">
+            <div id="outro-logo" class="logo-image-container">
+              <img src="assets/logo.png" alt="Jev Browser Logo" class="hero-logo-img" />
+            </div>
+            <h1 class="outro-title">JEV BROWSER</h1>
+            <p class="outro-tagline">Autonomous AI Browser Powered by Jev Decision Intelligence</p>
+            <div id="outro-install" class="install-card">
+              <span class="cmd-prompt">$</span>
+              <span>npm install -g @digitalfoudnry-vb/jev-browser</span>
+            </div>
+            <div class="feature-badges">
+              <div class="feat-badge">Parallel Task Spaces</div>
+              <div class="feat-badge">Zero Desktop Hijack</div>
+              <div class="feat-badge">Probabilistic Engine</div>
+              <div class="feat-badge">Open Source</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GSAP TIMELINE SCRIPT -->
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Ambient breathing glow
+      tl.to("#ambient-glow", {
+        scale: 1.15,
+        opacity: 0.9,
+        duration: 4,
+        yoyo: true,
+        repeat: 4,
+        ease: "sine.inOut"
+      }, 0);
+
+      // --- SCENE 1 (0.0s - 3.2s): CLI Command Typing ---
+      const fullCmd = 'jev-browser run "Find Python 3.13 key features" https://python.org';
+      const typedEl = document.getElementById("typed-text");
+
+      // Animate text typing character by character deterministically
+      const chars = fullCmd.split("");
+      const typeStart = 0.4;
+      const typeDuration = 2.0;
+      chars.forEach((c, i) => {
+        const t = typeStart + (i / chars.length) * typeDuration;
+        tl.call(() => {
+          typedEl.textContent = fullCmd.substring(0, i + 1);
+        }, null, t);
+      });
+
+      // Blinking cursor
+      tl.to("#term-cursor", {
+        opacity: 0,
+        duration: 0.25,
+        repeat: 11,
+        yoyo: true,
+        ease: "steps(1)"
+      }, 0.2);
+
+      // Enter key pulse & command output reveal at 2.6s (beat-locked)
+      tl.to("#term-out-1", {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: "power2.out"
+      }, 2.6);
+
+      // Exit Scene 1 at 3.2s
+      tl.to("#scene-1", {
+        opacity: 0,
+        scale: 0.96,
+        duration: 0.35,
+        ease: "power2.in"
+      }, 3.05);
+
+      // --- SCENE 2 (3.2s - 7.5s): Parallel Workspaces Reveal ---
+      tl.fromTo("#scene-2", 
+        { opacity: 0, scale: 1.04 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" },
+        3.2
+      );
+
+      // Settle cards with slight stagger
+      tl.from(".workspace-card", {
+        y: 30,
+        opacity: 0,
+        stagger: 0.15,
+        duration: 0.6,
+        ease: "power2.out"
+      }, 3.35);
+
+      // Exit Scene 2 at 7.3s
+      tl.to("#scene-2", {
+        opacity: 0,
+        scale: 0.97,
+        duration: 0.35,
+        ease: "power2.in"
+      }, 7.2);
+
+      // --- SCENE 3 (7.5s - 13.0s): Snapshots & Probabilistic Matrix ---
+      tl.fromTo("#scene-3",
+        { opacity: 0, scale: 1.03 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" },
+        7.5
+      );
+
+      // Animate probability bars growing
+      tl.to("#bar-fill-1", { width: "94.2%", duration: 0.8, ease: "power3.out" }, 8.0);
+      tl.to("#bar-fill-2", { width: "4.1%", duration: 0.8, ease: "power3.out" }, 8.1);
+      tl.to("#bar-fill-3", { width: "1.7%", duration: 0.8, ease: "power3.out" }, 8.2);
+
+      // HUD cursor glide towards @2 button (between 8.8s and 10.5s)
+      tl.fromTo("#hud-cursor",
+        { x: 300, y: 150, opacity: 0 },
+        { x: 0, y: 0, opacity: 1, duration: 1.4, ease: "power2.inOut" },
+        8.8
+      );
+
+      // Click event at 10.5s (beat-locked)
+      tl.to("#target-btn", {
+        scale: 0.95,
+        duration: 0.1,
+        yoyo: true,
+        repeat: 1,
+        ease: "power1.inOut"
+      }, 10.5);
+
+      tl.fromTo("#click-ripple",
+        { scale: 0.2, opacity: 0.9 },
+        { scale: 1.8, opacity: 0, duration: 0.6, ease: "power2.out" },
+        10.5
+      );
+
+      // Exit Scene 3 at 12.8s
+      tl.to("#scene-3", {
+        opacity: 0,
+        scale: 0.97,
+        duration: 0.35,
+        ease: "power2.in"
+      }, 12.75);
+
+      // --- SCENE 4 (13.0s - 16.8s): Goal Completed & Markdown Card ---
+      tl.fromTo("#scene-4",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+        13.0
+      );
+
+      tl.from(".md-bullet", {
+        x: -20,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.4,
+        ease: "power2.out"
+      }, 13.4);
+
+      // Exit Scene 4 at 16.6s
+      tl.to("#scene-4", {
+        opacity: 0,
+        scale: 0.97,
+        duration: 0.35,
+        ease: "power2.in"
+      }, 16.5);
+
+      // --- SCENE 5 (16.8s - 20.0s): Hero Outro ---
+      tl.fromTo("#scene-5",
+        { opacity: 0, scale: 0.95 },
+        { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" },
+        16.8
+      );
+
+      tl.from("#outro-logo", {
+        scale: 0.6,
+        opacity: 0,
+        duration: 0.7,
+        ease: "back.out(1.7)"
+      }, 16.9);
+
+      // Strong cue lock at 18.55s (cue in music): Install card glow pulse
+      tl.to("#outro-install", {
+        boxShadow: "0 10px 40px rgba(0,0,0,0.6), 0 0 45px rgba(56, 189, 248, 0.6)",
+        borderColor: "#38bdf8",
+        duration: 0.4,
+        yoyo: true,
+        repeat: 1,
+        ease: "power2.inOut"
+      }, 18.55);
+
+      // Register timeline with HyperFrames
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
