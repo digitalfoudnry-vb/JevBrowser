@@ -4,7 +4,12 @@
   "description": "Reusable Jev browser skill and MCP server with scoped, public-only browser egress",
   "type": "module",
   "license": "MIT",
-  "author": "Joey Kudish",
+  "author": "digitalfoundry.ai (https://digitalfoundry.ai/)",
+  "contributors": [
+    "digitalfoundry.ai",
+    "Joey Kudish"
+  ],
+  "homepage": "https://digitalfoundry.ai/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/digitalfoudnry-vb/JevBrowser.git"

@@ -65,17 +65,63 @@ EOF
 # Create executable launcher
 cat > "${MACOS}/Jev Browser" << 'EOF'
 #!/usr/bin/env bash
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)"
+set -e
+
+# Ensure node and standard tools are available in GUI environment
+export PATH="/usr/local/bin:/opt/homebrew/bin:${HOME}/.local/bin:$PATH"
+
+# Resolve installation directory
+APP_DIR=""
+for candidate in \
+  "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)" \
+  "${HOME}/JEVBROWSER" \
+  "/Users/vikrambala/JEVBROWSER" \
+  "${HOME}/.jev-browser"
+do
+  if [ -f "${candidate}/dist/index.js" ]; then
+    APP_DIR="${candidate}"
+    break
+  fi
+done
+
+if [ -z "${APP_DIR}" ]; then
+  osascript -e 'display dialog "Could not locate Jev Browser installation. Please run scripts/install-mac.sh." buttons {"OK"} default button "OK" with icon stop with title "Jev Browser Error"'
+  exit 1
+fi
+
 export JEV_PROVIDER="${JEV_PROVIDER:-vercel}"
 
-# Ensure node is available in GUI environment
-export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+# If command-line arguments are supplied (e.g., 'run ...'), execute CLI
+if [ "$#" -gt 0 ]; then
+  exec node "${APP_DIR}/dist/index.js" "$@"
+fi
 
+# GUI Mode (Double-clicked in Finder/Dock):
+# 1. Ensure local website/dashboard server is running on port 8000
+if ! curl -s -o /dev/null -m 1 "http://localhost:8000/"; then
+  PORT=8000 node "${APP_DIR}/scripts/serve-website.mjs" >/tmp/jev-browser-server.log 2>&1 &
+  sleep 0.8
+fi
+
+# 2. Locate Chromium browser executable from Playwright or system
+CHROME_BIN=""
 if command -v node >/dev/null 2>&1; then
-  exec node "${DIR}/dist/index.js" "$@"
+  CHROME_BIN="$(node -e 'import("playwright").then(({chromium})=>console.log(chromium.executablePath())).catch(()=>console.log(""))' 2>/dev/null || true)"
+fi
+
+PROFILE_DIR="${HOME}/.jev-browser/chrome-profile"
+mkdir -p "${PROFILE_DIR}"
+
+if [ -n "${CHROME_BIN}" ] && [ -x "${CHROME_BIN}" ]; then
+  exec "${CHROME_BIN}" \
+    --app="http://localhost:8000" \
+    --user-data-dir="${PROFILE_DIR}" \
+    --window-size=1280,850 \
+    --disable-quic \
+    "$@"
 else
-  osascript -e 'display dialog "Node.js (>=22.18) is required to run Jev Browser. Please install Node.js from https://nodejs.org or via brew install node." buttons {"OK"} default button "OK" with icon stop with title "Jev Browser Error"'
-  exit 1
+  # Fallback: open in default browser
+  open "http://localhost:8000"
 fi
 EOF
 
