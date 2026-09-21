@@ -10,11 +10,11 @@ test('preview creates no user directories', async () => {
   const home = await mkdtemp(join(tmpdir(), 'jev-install-'));
   try {
     const preview = await installSkill({client:'all', home});
-    assert.equal(preview.destinations.length,4); assert.equal(preview.applied,false);
+    assert.equal(preview.destinations.length,5); assert.equal(preview.applied,false);
     assert.deepEqual(await readdir(home),[]);
   } finally { await rm(home,{recursive:true,force:true}); }
 });
-test('all four clients receive the same self-contained skill and references', async () => {
+test('all five clients receive the same self-contained skill and references', async () => {
   const home = await mkdtemp(join(tmpdir(), 'jev-install-'));
   try {
     const result = await installSkill({client:'all',home,apply:true});
@@ -38,9 +38,9 @@ test('conflicting installation prevents writes to every client and preserves use
 test('generated launch configs preserve paths with spaces and shell metacharacters as arguments', () => {
   const envFile='/tmp/Local Keys/jev $KEY.env';
   const serverFile='/tmp/Browser Project/dist/index.js';
-  for (const client of ['claude','hermes','openclaw']) {
+  for (const client of ['antigravity','claude','hermes','openclaw']) {
     const value=JSON.parse(configuration(client,envFile,serverFile));
-    const server=client==='claude'?value.mcpServers['jev-browser']:client==='hermes'?value.mcp_servers['jev-browser']:value.mcp.servers['jev-browser'];
+    const server=['antigravity','claude'].includes(client)?value.mcpServers['jev-browser']:client==='hermes'?value.mcp_servers['jev-browser']:value.mcp.servers['jev-browser'];
     assert.equal(server.command,process.execPath);
     assert.deepEqual(server.args,[`--env-file=${envFile}`,serverFile]);
   }

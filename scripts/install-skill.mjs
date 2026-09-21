@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const source = fileURLToPath(new URL('../jevskills/jev-browser/', import.meta.url));
 export const clientRoots = {
+  antigravity: '.gemini/config/skills',
   claude: '.claude/skills',
   codex: '.agents/skills',
   hermes: '.hermes/skills',
@@ -14,7 +15,7 @@ export const clientRoots = {
 };
 
 export async function installSkill({ client, home = homedir(), apply = false, force = false }) {
-  if (client !== 'all' && !Object.hasOwn(clientRoots, client)) throw new Error('Choose claude, codex, hermes, openclaw, or all');
+  if (client !== 'all' && !Object.hasOwn(clientRoots, client)) throw new Error('Choose antigravity, claude, codex, hermes, openclaw, or all');
   const clients = client === 'all' ? Object.keys(clientRoots) : [client];
   const destinations = clients.map(name => ({ client: name, path: join(resolve(home), clientRoots[name], 'jev-browser') }));
   // Inspect every destination before writing any of them; preserve existing installations unless force is requested.
@@ -54,7 +55,7 @@ export async function installSkill({ client, home = homedir(), apply = false, fo
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help')) {
-    console.log('node scripts/install-skill.mjs --client claude|codex|hermes|openclaw|all [--home /path/to/home] [--apply] [--force]\nDefaults to preview only.');
+    console.log('node scripts/install-skill.mjs --client antigravity|claude|codex|hermes|openclaw|all [--home /path/to/home] [--apply] [--force]\nDefaults to preview only.');
     return;
   }
   const options = {};
