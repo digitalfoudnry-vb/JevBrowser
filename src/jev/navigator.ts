@@ -82,6 +82,7 @@ export async function jevNavigate(
         interactive_elements: elements.map((e) => ({ id: e.id, description: e.description })),
         element_list_truncated: truncated,
         history,
+        allowed_hosts: Array.from(allowedHosts),
       };
 
       const criteria = buildCriteria(elements);
@@ -221,6 +222,7 @@ export async function jevNavigate(
         true_length: finalContent.length,
         content: finalContent.slice(0, options.maxChars ?? 16000),
       },
+      extracted_content: finalContent.slice(0, options.maxChars ?? 16000),
       screenshot_base64_jpeg: screenshotBase64,
       usage,
       elapsed_ms: Math.round(performance.now() - started),

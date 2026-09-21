@@ -124,6 +124,14 @@ const STOP_WORDS = new Set([
 
 /** Deterministic typing fallback when no small-LLM key is available. */
 export function heuristicQuery(task: string): string {
+  const quoteMatch = task.match(/["']([^"']+)["']/);
+  if (quoteMatch && quoteMatch[1].trim()) {
+    return quoteMatch[1].trim();
+  }
+  const asWithMatch = task.match(/\b(?:as|with|value)\s+([A-Za-z0-9_-]+)/i);
+  if (asWithMatch && asWithMatch[1]) {
+    return asWithMatch[1].trim();
+  }
   const words = task
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, " ")

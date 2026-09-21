@@ -9,18 +9,19 @@ export function configuration(client, envFile, serverFile = fileURLToPath(new UR
   const args = [`--env-file=${envFile}`, serverFile];
   const server = { command, args };
   switch (client) {
+    case 'antigravity':
     case 'claude': return JSON.stringify({ mcpServers: { 'jev-browser': server } }, null, 2) + '\n';
     case 'codex': return `[mcp_servers.jev-browser]\ncommand = ${JSON.stringify(command)}\nargs = ${JSON.stringify(args)}\nstartup_timeout_sec = 30\ntool_timeout_sec = 210\nenabled_tools = ["jev_navigate"]\n`;
     // JSON is a YAML subset; Hermes can merge this object into config.yaml.
     case 'hermes': return JSON.stringify({ mcp_servers: { 'jev-browser': { ...server, timeout: 210, tools: { include: ['jev_navigate'] } } } }, null, 2) + '\n';
     case 'openclaw': return JSON.stringify({ mcp: { servers: { 'jev-browser': { ...server, requestTimeoutMs: 210000, toolFilter: { include: ['jev_navigate'] } } } } }, null, 2) + '\n';
-    default: throw new Error('Choose claude, codex, hermes, or openclaw');
+    default: throw new Error('Choose antigravity, claude, codex, hermes, or openclaw');
   }
 }
 function main() {
   const options = {};
   const args = process.argv.slice(2);
-  if (args.includes('--help')) { console.log('node scripts/print-mcp-config.mjs --client claude|codex|hermes|openclaw --env-file /absolute/path/to/jev-browser.env'); return; }
+  if (args.includes('--help')) { console.log('node scripts/print-mcp-config.mjs --client antigravity|claude|codex|hermes|openclaw --env-file /absolute/path/to/jev-browser.env'); return; }
   for (let i = 0; i < args.length; i++) {
     if (!['--client','--env-file'].includes(args[i]) || !args[i+1] || args[i+1].startsWith('--')) throw new Error(`Unknown argument or missing value: ${args[i]}`);
     options[args[i].slice(2)] = args[++i];

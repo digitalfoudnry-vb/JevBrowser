@@ -104,6 +104,7 @@ export interface JevNavigateResult {
     true_length: number;
     content: string;
   } | null;
+  extracted_content?: string;
   screenshot_base64_jpeg?: string | null;
   usage: {
     jev_calls: number;

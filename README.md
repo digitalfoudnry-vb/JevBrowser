@@ -95,9 +95,27 @@ Or invoke the skill directly in your agent:
 /jev-browser Find the top 3 trending GitHub repositories in artificial intelligence and extract their key contributors
 ```
 
-The agent picks up the `jev-browser` skill, opens the page in its own Space, reads a Snapshot (the page turned into structured semantic text), acts on the page, and reports back—all while your own tabs stay completely untouched.
-
 Your browsing data, cookies, and everything else the browser holds stay on your device. Jev Browser keeps data collection deliberately narrow: simple product signals, like whether you've set Jev Browser as your default browser.
+
+---
+
+### 3. Run the Autonomous Automation Demo
+
+Try an immediate end-to-end task space automation with live AST snapshotting and in-page execution:
+
+```bash
+npm run demo:automation
+```
+
+This initializes an isolated task space, navigates to the local Jev Browser dashboard, compiles the semantic element snapshot with `@ref` markers, executes in-page tab interactions, and saves a verification screenshot to `/tmp/jev-browser-live-automation.png`.
+
+<div align="center">
+
+<img src="assets/screenshots/jev-browser-live-automation.png" alt="Jev Browser Live Automation Screenshot" width="720" />
+
+*Captured autonomously by Jev Browser during live task space execution*
+
+</div>
 
 ---
 

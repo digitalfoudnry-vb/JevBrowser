@@ -60,6 +60,10 @@ export class StandalonePage {
     return { popups: [] };
   }
 
+  async setContent(html: string): Promise<void> {
+    await this.#pwPage.setContent(html);
+  }
+
   async reload(): Promise<PageActionReceipt> {
     await this.#pwPage.reload({ waitUntil: "domcontentloaded" });
     return { popups: [] };
@@ -124,6 +128,14 @@ export class StandaloneTaskSpace {
     this.name = name;
     this.#context = context;
     this.#browser = browser;
+  }
+
+  get id(): string {
+    return this.name;
+  }
+
+  async close(): Promise<void> {
+    return this.finish();
   }
 
   page(label: string = "p1"): StandalonePage {

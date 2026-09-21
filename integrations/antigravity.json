@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "jev-browser": {
+      "command": "node",
+      "args": ["--env-file=/absolute/path/to/jev-browser.env", "/absolute/path/to/JevBrowser/dist/index.js"]
+    }
+  }
+}
